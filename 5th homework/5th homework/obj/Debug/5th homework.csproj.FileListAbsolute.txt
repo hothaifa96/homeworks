@@ -1,0 +1,10 @@
+C:\Users\lenovo\source\repos\5th homework\5th homework\bin\Debug\5th homework.exe.config
+C:\Users\lenovo\source\repos\5th homework\5th homework\bin\Debug\5th homework.exe
+C:\Users\lenovo\source\repos\5th homework\5th homework\bin\Debug\5th homework.pdb
+C:\Users\lenovo\source\repos\5th homework\5th homework\obj\Debug\5th homework.csprojAssemblyReference.cache
+C:\Users\lenovo\source\repos\5th homework\5th homework\obj\Debug\_5th_homework.Form1.resources
+C:\Users\lenovo\source\repos\5th homework\5th homework\obj\Debug\_5th_homework.Properties.Resources.resources
+C:\Users\lenovo\source\repos\5th homework\5th homework\obj\Debug\5th homework.csproj.GenerateResource.cache
+C:\Users\lenovo\source\repos\5th homework\5th homework\obj\Debug\5th homework.csproj.CoreCompileInputs.cache
+C:\Users\lenovo\source\repos\5th homework\5th homework\obj\Debug\5th homework.exe
+C:\Users\lenovo\source\repos\5th homework\5th homework\obj\Debug\5th homework.pdb
