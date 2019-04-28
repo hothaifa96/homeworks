@@ -1,0 +1,310 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace calculator_and_oredres_sql_project
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+           // calculator();
+            orders();
+        }
+
+        private static void orders()
+        {
+            bool flag ;
+            int input=0;
+            do
+            {
+                Console.WriteLine("exist customer ? (press 1)");
+                Console.WriteLine("new customer ? (press 2)");
+                Console.WriteLine(" exist supplier ? (press 3)");
+                Console.WriteLine("new supplier ? (press 4)");
+                Console.WriteLine("bla bla table ? (press 5)");
+                int.TryParse(Console.ReadLine(), out input);
+                flag = (input == null||input <5||input >1 ? false : true);
+                
+            } while (flag);
+            SqlCommand com = sql_connections.ConnectTo("Orders");
+            CalcSQLFunc ord = new CalcSQLFunc();
+            ord.CreateTable("customers", com, "custID / notnull,username nvarchar(50) Identity,password nvarname(50),firstName nvarchar(50),lastName nvarchar(50), creditCardNum int ");
+            ord.CreateTable("suppliers", com, "supID int notnull,username nvarchar(50) Identity,password nvarname(50),firstName nvarchar(50),lastName nvarchar(50), creditCardNum int ");
+            ord.CreateTable("products", com, "proID int notnull,productName nvarchar(50) Identity,supID int notnull,price int ,avalable int ");
+            ord.CreateTable("orders", com, "orderID int notnull,cusrID int notnull,items int notnull,totalcheck int ");
+            switch (input)
+            {
+                case (1):
+                    break;
+                case (2):
+                    customerRegister(com);
+                    break;
+                case (3):
+                    break;
+                case (4):
+                    break;
+                case (5):
+                    break;
+            }
+
+            com.Connection.Close();
+        }
+
+        private static void customerRegister(SqlCommand com)
+        {
+            Console.WriteLine("Regiusteration");
+            Console.WriteLine("user name : ");
+            string username =Console.ReadLine();
+            Console.WriteLine("password");
+            string password = Console.ReadLine();
+            if (password==null || username==null )
+            {
+                Console.WriteLine("illegal input ");
+            }
+            else 
+                com.CommandText= "insert into customers (username,password,firstName,lastName,creditCardNum)  values ()"
+        }
+
+        private static void calculator()
+        {
+            #region variables
+            string xTableName ="Xs", yTableName="Ys";
+            bool flag = true;
+            CalcSQLFunc csql = new CalcSQLFunc();
+            SqlCommand cmd = sql_connections.ConnectTo("Calculator");
+            #endregion
+            
+            #region Table_Creation
+            csql.CreateTable("res", cmd, "res int");
+            cmd.CommandText = "INSERT INTO res VALUES (null) ;";
+            cmd.ExecuteNonQuery();
+            csql.CreateTable("Results", cmd, "x int  , op nvarchar(50) , y int  , result int ");
+            csql.CreateTable(xTableName, cmd, "x int");
+            csql.CreateTable(yTableName, cmd, "y int");
+            #endregion
+            while (flag)
+            {
+                Console.WriteLine("please enter the X : ");
+                //int x =int.Parse(Console.ReadLine());
+                int.TryParse(Console.ReadLine(), out int x);
+                if (x > 0)
+                {
+                    csql.InsertToTable(xTableName, cmd, x.ToString());
+                    Console.WriteLine("please enter the Y : ");
+                    int.TryParse(Console.ReadLine(), out int y);
+                    csql.InsertToTable(yTableName, cmd, y.ToString());
+                }
+                else flag = !flag;
+            
+            }// this while recive x and y from the user and insert them into the tables in the DB
+            #region opersator's_Table
+            csql.CreateTable("Operator", cmd, "Op nvarchar(50) ");
+            cmd.CommandText = "INSERT INTO Operator VALUES ('+');";
+            cmd.ExecuteNonQuery();
+            cmd.CommandText = "INSERT INTO Operator VALUES ('-');";
+            cmd.ExecuteNonQuery();
+            cmd.CommandText = "INSERT INTO Operator VALUES ('*');";
+            cmd.ExecuteNonQuery();
+            cmd.CommandText = "INSERT INTO Operator VALUES ('/');";
+            cmd.ExecuteNonQuery();
+
+            #endregion
+
+            List<object> list = csql.CrossJoin(cmd);
+            foreach(var m in list )
+            {
+                Console.WriteLine(m.ToString());
+            }
+            
+
+
+
+
+            /*
+            cmd.CommandText = "SELECT * FROM Employees";
+
+
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
+
+            List<Object> list = new List<object>();
+            while (reader.Read() == true)
+            {
+                Console.WriteLine($" {reader["ID"]} {reader["FIRSTNAME"]} {reader["LASTNAME"]} {reader["SALARY"]}");
+                var e = new
+                {
+                    Id = reader["ID"],
+                    firaName = reader["FIRSTNAME"]
+                };
+                list.Add(e);
+            }
+            */
+            cmd.Connection.Close();
+            Console.ReadKey();
+        }
+    }
+}
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+public List<object> CrossJoin(SqlCommand cmd )
+        {
+            cmd.CommandType = CommandType.Text;
+            cmd.CommandText = "insert into Results select X.x , O.op,Y.y,R.res from Xs X cross join Operator O cross join Ys Y cross join res R; ";
+            cmd.ExecuteNonQuery();
+            cmd.CommandText = ("SELECT * FROM  Results;");
+            SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.Default);
+
+            List<object> list = new List<object>();
+            while (reader.Read() == true)
+            {
+                var f = new 
+                {
+                    x = reader["x"],
+                    op = reader["op"],
+                    y=reader["y"],
+                    result=reader["result"]
+                };
+               /* switch(f.op)
+                {
+                    case "+":
+                        f.result = f.x + f.y;
+                        break;
+                    case "-":
+                        f.result = f.x - f.y;
+                        break;
+                    case "*":
+                        f.result = f.x * f.y;
+                        break;
+                    case "/":
+                        f.result = f.x / f.y;
+                        break;
+                }*/
+               // cmd.CommandText = $"UPDATE Results SET results ={f.result} where x = {reader[1]};";
+                //cmd.ExecuteNonQuery();
+                /* cmd.CommandText = $"UPDATE Results set result={e.res};";
+                 cmd.ExecuteNonQuery();  ((reader[1]=="+")? ((int)reader[0]+ (int)reader[2]):(reader[1] == "-") ? ((int)reader[0] - (int)reader[2]):(reader[1] == "*") ? ((int)reader[0] * (int)reader[2]):((reader[1] == "/")) ? ((int)reader[0] / (int)reader[2]):0)*/
+                list.Add(f);
+            }
+            return list ;
+            
+            
+            
+            
+            
+            ///////////////////////////////////////////////////////////////////
+            
+            
+            using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace calculator_and_oredres_sql_project
+{
+    public class FormulaDAO
+    {
+        public int x { get; set; }
+        public int y { get; set; }
+        public int  result { get; set; }
+        public string op { get; set; }
+        public FormulaDAO()
+        {
+
+        }
+
+        public FormulaDAO(int x, int y, int result, string op)
+        {
+            this.x = x;
+            this.y = y;
+            this.result = result;
+            this.op = op;
+        }
+
+        public override string ToString()
+        {
+            return $"{this.x}{this.op}{this.y}={this.result}";
+        }
+        
+    }
+}
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace calculator_and_oredres_sql_project
+{
+    public class FormulaDAO
+    {
+        public int x { get; set; }
+        public int y { get; set; }
+        public int  result { get; set; }
+        public string op { get; set; }
+        public FormulaDAO()
+        {
+
+        }
+
+        public FormulaDAO(int x, int y, int result, string op)
+        {
+            this.x = x;
+            this.y = y;
+            this.result = result;
+            this.op = op;
+        }
+
+        public override string ToString()
+        {
+            return $"{this.x}{this.op}{this.y}={this.result}";
+        }
+        
+    }
+}
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace calculator_and_oredres_sql_project
+{
+    public class FormulaDAO
+    {
+        public int x { get; set; }
+        public int y { get; set; }
+        public int  result { get; set; }
+        public string op { get; set; }
+        public FormulaDAO()
+        {
+
+        }
+
+        public FormulaDAO(int x, int y, int result, string op)
+        {
+            this.x = x;
+            this.y = y;
+            this.result = result;
+            this.op = op;
+        }
+
+        public override string ToString()
+        {
+            return $"{this.x}{this.op}{this.y}={this.result}";
+        }
+        
+    }
+}
